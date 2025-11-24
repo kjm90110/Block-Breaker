@@ -48,6 +48,7 @@ for (let r = 0; r < brick.rowCount; r++) {
     }
 }
 
+
 // 벽돌 그리기 함수
 function drawBricks() {
     for (let r = 0; r < brick.rowCount; r++) {
@@ -90,13 +91,35 @@ function collisionBrick() {
     }
 }
 
+// 벽돌이 다 깨졌는지 확인하는 함수
+function isAllBricksCleared() {
+    for (let r = 0; r < brick.rowCount; r++) {
+        for (let c = 0; c < brick.columnCount; c++) {
+            if (bricks[r][c].visible) {
+                return false; // 하나라도 남아있으면 false
+            }
+        }
+    }
+    return true; // 전부 false면 clear
+}
+
+
 /* -----------------------------
               업데이트
 ------------------------------ */
 let isGameOver = false;
+let isGameClear = false;
 
 function update() {
-    if (isGameOver) return; // 이미 게임오버면 더 이상 업데이트 X
+
+    if (isGameOver || isGameClear) return; // 이미 게임오버면 더 이상 업데이트 X
+    
+    if (isAllBricksCleared()) {
+        isGameClear = true;
+        alert('clear!');
+        document.location.reload();
+        return;
+    }
 
     paddle.x += paddle.dx;
 
@@ -112,13 +135,18 @@ function update() {
     }
 
     // 패들 충돌
+    const paddleY = canvas.height - paddle.height - 10;
+
     if (
-        ball.y > canvas.height - paddle.height - 20 &&
+        ball.y + ball.radius > paddleY &&
+        ball.y - ball.radius < paddleY + paddle.height &&
         ball.x > paddle.x &&
-        ball.x < paddle.x + paddle.width
+        ball.x < paddle.x + paddle.width &&
+        ball.dy > 0
     ) {
         ball.dy *= -1;
     }
+
 
     // 벽돌 충돌
     collisionBrick();
